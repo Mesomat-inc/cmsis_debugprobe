@@ -1,0 +1,51 @@
+Erase all:
+probe-rs erase --chip nrf<chip> --allow-erase-all
+
+To provision:
+1. build binaries:
+just build-<device> -p
+
+2. Flash mcuboot:
+probe-rs download --chip nrf<chip> --binary-format hex mcuboot.hex
+
+3. Flash application code:
+probe-rs download --chip nrf<chip> --binary-format hex primary_payload.signed.hex
+
+4. Attach rtt probe and run:
+probe-rs attach --chip nrf<chip> ../../sensor/target/thumbv8m.main-none-eabihf/debug/sensor
+
+or 
+
+probe-rs attach --chip nrf<chip> output/<device>/embassy.elf
+
+
+To program:
+1. build binaries
+build-<device> must have the same build type (-r) as the provisioned binary
+
+2. Flash mcuboot:
+probe-rs download --chip nrf<chip> --binary-format hex mcuboot.hex
+
+3. Flash application code:
+probe-rs download --chip nrf<chip> --binary-format hex primary_payload.signed.hex
+
+4. Attach rtt probe:
+probe-rs attach --chip nrf<chip> ../../sensor/target/thumbv8m.main-none-eabihf/debug/sensor
+
+or 
+
+probe-rs attach --chip nrf<chip> output/<device>/embassy.elf
+
+
+Debugging:
+1. Start openocd interface:
+openocd -f interface/cmsis-dap.cfg -f target/nordic/nrf54l.cfg 
+If the port already in use, run "sudo killall -9 openocd" or other commands to kill the port. 
+Probe-rs session should be ended before attempting to attach openocd
+
+2. Open port:
+ gdb-multiarch output/<device>/embassy.elf
+
+3. Connect to gdb target:
+target extended-remote localhost:<port>
+

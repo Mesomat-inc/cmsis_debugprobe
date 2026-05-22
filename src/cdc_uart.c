@@ -23,11 +23,13 @@
  *
  */
 
+
 #include <pico/stdlib.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "tusb.h"
 #include "autobaud.h"
+
 
 #include "probe_config.h"
 
@@ -35,6 +37,7 @@ TaskHandle_t uart_taskhandle;
 TickType_t last_wake, interval = 100;
 volatile TickType_t break_expiry;
 volatile bool timed_break;
+int time_to_print = 1000;
 
 /* Max 1 FIFO worth of data */
 static uint8_t tx_buf[32];
@@ -101,7 +104,6 @@ bool cdc_task(void)
     static uint cdc_tx_oe = 0;
     uint rx_len = 0;
     bool keep_alive = false;
-
     // Consume uart fifo regardless even if not connected
     while(uart_is_readable(PROBE_UART_INTERFACE) && (rx_len < sizeof(rx_buf))) {
         rx_buf[rx_len++] = uart_getc(PROBE_UART_INTERFACE);
@@ -109,6 +111,41 @@ bool cdc_task(void)
 
     if (tud_cdc_connected()) {
         was_connected = 1;
+
+        if (tud_cdc_available()) {
+            char cmd_buf[64] = {0};
+            uint32_t count = tud_cdc_read(cmd_buf, sizeof(cmd_buf) - 1);
+            if (count > 0) {
+                if (strstr(cmd_buf, "TARGET=9151")) {
+                    gpio_put(10, 1);
+                    tud_cdc_write("Switched to target 9151\r\n", 27);
+                    tud_cdc_write_flush();
+                } else if (strstr(cmd_buf, "TARGET=LM20")) {
+                    gpio_put(10, 0);
+                    tud_cdc_write("Switched to target LM20\r\n", 27);
+                    tud_cdc_write_flush();
+                } else if (strstr(cmd_buf, "UART=OFF")) {
+                    gpio_put(11, 0);
+                    tud_cdc_write("UART turned OFF\r\n", 26);
+                    tud_cdc_write_flush();
+                } else if (strstr(cmd_buf, "UART=ON")) {
+                    gpio_put(11, 1);
+                    tud_cdc_write("UART turned ON\r\n", 25);
+                    tud_cdc_write_flush();
+                } else if (strstr(cmd_buf, "SWD=OFF")) {
+                    gpio_put(12, 0);
+                    tud_cdc_write("SWD turned OFF\r\n", 26);
+                    tud_cdc_write_flush();
+                } else if (strstr(cmd_buf, "SWD=ON")) {
+                    gpio_put(12, 1);
+                    tud_cdc_write("SWD turned ON\r\n", 25);
+                    tud_cdc_write_flush();
+                } else {
+                    tud_cdc_write("Unknown command\r\n", 17);
+                    tud_cdc_write_flush();
+                }
+            }
+        }
         int written = 0;
         /* Implicit overflow if we don't write all the bytes to the host.
          * Also throw away bytes if we can't write... */
@@ -133,7 +170,7 @@ bool cdc_task(void)
             gpio_put(PROBE_UART_RX_LED, 0);
 #endif
         }
-
+      
       /* Reading from a firehose and writing to a FIFO. */
       size_t watermark = MIN(tud_cdc_available(), sizeof(tx_buf));
       if (watermark > 0) {
