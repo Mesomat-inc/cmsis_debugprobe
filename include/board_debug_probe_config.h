@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  *
  */
-
+/*
 #ifndef BOARD_DEBUG_PROBE_H_
 #define BOARD_DEBUG_PROBE_H_
 
 #define PROBE_IO_SWDI
 #define PROBE_CDC_UART
-// No reset pin 
+// No reset pin
 
 // PIO config
 #define PROBE_SM 0
@@ -51,5 +51,32 @@
 #define PROBE_UART_TX_LED 8
 
 #define PROBE_PRODUCT_STRING "Debug Probe (CMSIS-DAP)"
+
+#endif
+*/
+
+#ifndef BOARD_PICO_H_
+#define BOARD_PICO_H_
+
+#define PROBE_IO_RAW
+#define PROBE_CDC_UART
+
+// PIO config
+#define PROBE_SM 0
+#define PROBE_PIN_OFFSET 2
+#define PROBE_PIN_SWCLK (PROBE_PIN_OFFSET + 0) // 2
+#define PROBE_PIN_SWDIO (PROBE_PIN_OFFSET + 1) // 3
+// Target reset config
+#define PROBE_PIN_RESET 1
+
+// UART config
+#define PROBE_UART_TX 4
+#define PROBE_UART_RX 5
+#define PROBE_UART_INTERFACE uart1
+#define PROBE_UART_BAUDRATE 115200
+
+#define PROBE_USB_CONNECTED_LED 25
+
+#define PROBE_PRODUCT_STRING "Debugprobe on Pico (CMSIS-DAP)"
 
 #endif

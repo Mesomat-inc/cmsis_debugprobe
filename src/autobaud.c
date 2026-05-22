@@ -242,7 +242,7 @@ uint estimate_baud_rate() {
             // Calculate baud from average of 1-bit times
             float avg_bit_time = (float) bit_time_sum / (float) bit_time_count;
             float new_baud = PIO_CLOCK_FREQUENCY / avg_bit_time;
-            // If baud has changed, send updated baud information to cdc_thread
+            // If baud has changed, send updated baud information to 
             if (baud_changed(new_baud, baud)) {
                 float completeness = 1.0f - expf(-(float) total_samples / 40.0f);
                 float noise_ratio = (float) outlier_count / (float) bit_time_count;

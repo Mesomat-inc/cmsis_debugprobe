@@ -30,6 +30,7 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "pico/binary_info.h"
 
 #if PICO_SDK_VERSION_MAJOR >= 2
 #include "bsp/board_api.h"
@@ -41,11 +42,13 @@
 #include "probe_config.h"
 #include "probe.h"
 #include "cdc_uart.h"
+#include "power_monitor.h"
 #include "autobaud.h"
 #include "get_serial.h"
 #include "tusb_edpt_handler.h"
 #include "DAP.h"
 #include "hardware/structs/usb.h"
+#include "hardware/i2c.h"
 
 // UART0 for debugprobe debug
 // UART1 for debugprobe to target device
@@ -55,13 +58,15 @@ static uint8_t RxDataBuffer[CFG_TUD_HID_EP_BUFSIZE];
 
 #define THREADED 1
 
+#define POWER_MONITOR_TASK_PRIO (tskIDLE_PRIORITY + 1)
 #define UART_TASK_PRIO (tskIDLE_PRIORITY + 3)
 #define TUD_TASK_PRIO  (tskIDLE_PRIORITY + 2)
 #define DAP_TASK_PRIO  (tskIDLE_PRIORITY + 1)
 
 #define AUTOBAUD_TASK_PRIO  (tskIDLE_PRIORITY + 1)
 
-TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle;
+
+TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle, i2c_taskhandle, info_taskhandle;
 
 static int was_configured;
 
@@ -139,7 +144,17 @@ void usb_thread(void *ptr)
 #endif
 
 int main(void) {
+    gpio_init(10);
+    gpio_init(11);
+    gpio_init(12);
+    gpio_set_dir(10, GPIO_OUT);
+    gpio_set_dir(11, GPIO_OUT);
+    gpio_set_dir(12, GPIO_OUT);
+    gpio_put(10, 0);
+    gpio_put(11, 0);
+    gpio_put(12, 0);
     // Declare pins in binary information
+    stdio_init_all();
     bi_decl_config();
 
     board_init();
@@ -149,7 +164,6 @@ int main(void) {
     stdio_uart_init();
 
     DAP_Setup();
-
     probe_info("Welcome to debugprobe!\n");
 
     if (THREADED) {
@@ -165,7 +179,6 @@ int main(void) {
 #endif
         vTaskStartScheduler();
     }
-
     while (!THREADED) {
         tud_task();
         cdc_task();
@@ -281,6 +294,10 @@ void tud_unmount_cb(void)
     autobaud_wait_stop();
   vTaskSuspend(autobaud_taskhandle);
   vTaskDelete(autobaud_taskhandle);
+  vTaskSuspend(i2c_taskhandle);
+  vTaskDelete(i2c_taskhandle);
+  vTaskSuspend(info_taskhandle);
+  vTaskDelete(info_taskhandle);
   was_configured = 0;
 }
 
@@ -294,7 +311,16 @@ void tud_mount_cb(void)
     xTaskCreate(dap_thread, "DAP", configMINIMAL_STACK_SIZE, NULL, DAP_TASK_PRIO, &dap_taskhandle);
     /* Autobaud detection using PIO as a frequency counter */
     xTaskCreate(autobaud_thread, "ABR", configMINIMAL_STACK_SIZE, NULL, AUTOBAUD_TASK_PRIO, &autobaud_taskhandle);
-#if(configNUMBER_OF_CORES > 1)
+
+    xTaskCreate(power_monitor_thread, "PM", configMINIMAL_STACK_SIZE, NULL, POWER_MONITOR_TASK_PRIO, &i2c_taskhandle);
+
+    xTaskCreate(print_power_monitor_info_thread, "PMI", configMINIMAL_STACK_SIZE, NULL, POWER_MONITOR_TASK_PRIO, &info_taskhandle);
+     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 0));
+    vTaskCoreAffinitySet(dap_taskhandle, (1 << 0));
+    vTaskCoreAffinitySet(uart_taskhandle, (1 << 0));
+    vTaskCoreAffinitySet(info_taskhandle, (1 << 0));
+    vTaskCoreAffinitySet(i2c_taskhandle, (1 << 1));
+    #if(configNUMBER_OF_CORES > 1)
     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(uart_taskhandle, (1 << 0));
