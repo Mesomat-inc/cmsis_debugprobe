@@ -135,14 +135,16 @@ void power_monitor_thread(void *ptr) {
 void print_power_monitor_info_thread(void *ptr) {
     while (1) {
         char output[150];
-        int len = snprintf(output, sizeof(output), "Samples: %d, Current: %lfuA, Peak: %lfuA, Power: %lfuW, Vbus: %lfV\r\n", times, (current * current_lsb) / times, current_peak * current_lsb, (power * current_lsb * 3.2) / times, (voltage * 195.3125 / 1000000) / times);
+        if (times == 0 || current == 0){
+            continue;
+        }
+        int len = snprintf(output, sizeof(output), "%lf\r\n", (current * current_lsb) / times);
         tud_cdc_write(output, len);
         current = 0;
         power = 0;
         voltage = 0;
         times = 0;
         current_peak = 0;
-        sleep_ms(1000);
     }
 }
 
