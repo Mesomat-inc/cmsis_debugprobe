@@ -30,7 +30,7 @@
 #define PROBE_CDC_UART
 
 // PIO config
-#define PROBE_SM 0
+#define PROBE_SM 22
 #define PROBE_PIN_OFFSET 2
 #define PROBE_PIN_SWCLK (PROBE_PIN_OFFSET + 0) // 2
 #define PROBE_PIN_SWDIO (PROBE_PIN_OFFSET + 1) // 3

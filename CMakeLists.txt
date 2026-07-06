@@ -110,9 +110,11 @@ target_link_libraries(debugprobe PRIVATE
         tinyusb_device
         tinyusb_board
         hardware_pio
+        hardware_gpio
         hardware_dma
         hardware_irq
         hardware_clocks
+        hardware_spi
         hardware_i2c
         FreeRTOS-Kernel
         FreeRTOS-Kernel-Heap1
@@ -121,3 +123,6 @@ target_link_libraries(debugprobe PRIVATE
 pico_set_binary_type(debugprobe copy_to_ram)
 
 pico_add_extra_outputs(debugprobe)
+
+pico_enable_stdio_uart(debugprobe 0)
+pico_enable_stdio_usb(debugprobe 1)
