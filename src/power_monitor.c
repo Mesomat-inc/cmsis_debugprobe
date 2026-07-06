@@ -59,12 +59,12 @@ uint8_t alert_config_setting[] = {0b01000000, 0b00000000}; // Alert on current o
 
 // 10ohm stunt
 //uint8_t shunt_cal_setting[] = {0x09, 0xC4}; // max 0.01A
-//uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
+uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
 //uint8_t shunt_cal_setting[] = {0x61, 0xA8}; // max 0.1A
 
 // 1.5ohm shunt
 //uint8_t shunt_cal_setting[] = {0x01, 0x77}; // max 0.01A
-uint8_t shunt_cal_setting[] = {0x07, 0x53}; // max 0.05A
+//uint8_t shunt_cal_setting[] = {0x07, 0x53}; // max 0.05A
 //uint8_t shunt_cal_setting[] = {0x0E, 0xA6}; // max 0.1A
 //uint8_t shunt_cal_setting[] = {0x3A, 0x98}; // max 0.1A adcrange=1
 
