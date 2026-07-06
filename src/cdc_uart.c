@@ -116,33 +116,29 @@ bool cdc_task(void)
             char cmd_buf[64] = {0};
             uint32_t count = tud_cdc_read(cmd_buf, sizeof(cmd_buf) - 1);
             if (count > 0) {
-                if (strstr(cmd_buf, "TARGET=9151")) {
-                    gpio_put(10, 1);
-                    tud_cdc_write("Switched to target 9151\r\n", 27);
-                    tud_cdc_write_flush();
-                } else if (strstr(cmd_buf, "TARGET=LM20")) {
-                    gpio_put(10, 0);
-                    tud_cdc_write("Switched to target LM20\r\n", 27);
-                    tud_cdc_write_flush();
-                } else if (strstr(cmd_buf, "UART=OFF")) {
-                    gpio_put(11, 0);
-                    tud_cdc_write("UART turned OFF\r\n", 26);
-                    tud_cdc_write_flush();
+                if (strstr(cmd_buf, "UART=OFF")) {
+                    gpio_put(7, 1);
+                    tud_cdc_write("UART turned OFF\r\n", 18);
+                  
                 } else if (strstr(cmd_buf, "UART=ON")) {
-                    gpio_put(11, 1);
-                    tud_cdc_write("UART turned ON\r\n", 25);
-                    tud_cdc_write_flush();
+                    gpio_put(7, 0);
+                    tud_cdc_write("UART turned ON\r\n", 17);
+                 
                 } else if (strstr(cmd_buf, "SWD=OFF")) {
-                    gpio_put(12, 0);
-                    tud_cdc_write("SWD turned OFF\r\n", 26);
-                    tud_cdc_write_flush();
+                    gpio_put(0, 1);
+                    tud_cdc_write("SWD turned OFF\r\n", 17);
+                    
                 } else if (strstr(cmd_buf, "SWD=ON")) {
-                    gpio_put(12, 1);
-                    tud_cdc_write("SWD turned ON\r\n", 25);
-                    tud_cdc_write_flush();
+                    gpio_put(0, 0);
+                    tud_cdc_write("SWD turned ON\r\n", 16);
+                 
+                } else if (strstr(cmd_buf, "SWITCH_STATUS")) {
+                    char status[64];
+                    snprintf(status, sizeof(status), "SWD: %s UART: %s\r\n",
+                             gpio_get(0) ? "OFF" : "ON", gpio_get(7) ? "OFF" : "ON");
+                    tud_cdc_write(status, strlen(status));
                 } else {
                     tud_cdc_write("Unknown command\r\n", 17);
-                    tud_cdc_write_flush();
                 }
             }
         }

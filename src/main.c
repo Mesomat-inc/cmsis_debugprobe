@@ -48,7 +48,7 @@
 #include "tusb_edpt_handler.h"
 #include "DAP.h"
 #include "hardware/structs/usb.h"
-#include "hardware/i2c.h"
+#include "hardware/spi.h"
 
 // UART0 for debugprobe debug
 // UART1 for debugprobe to target device
@@ -66,7 +66,7 @@ static uint8_t RxDataBuffer[CFG_TUD_HID_EP_BUFSIZE];
 #define AUTOBAUD_TASK_PRIO  (tskIDLE_PRIORITY + 1)
 
 
-TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle, i2c_taskhandle, info_taskhandle;
+TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle, spi_taskhandle, info_taskhandle;
 
 static int was_configured;
 
@@ -144,27 +144,24 @@ void usb_thread(void *ptr)
 #endif
 
 int main(void) {
-    gpio_init(10);
-    gpio_init(11);
-    gpio_init(12);
-    gpio_set_dir(10, GPIO_OUT);
-    gpio_set_dir(11, GPIO_OUT);
-    gpio_set_dir(12, GPIO_OUT);
-    gpio_put(10, 0);
-    gpio_put(11, 0);
-    gpio_put(12, 0);
+  stdio_init_all();
+    
     // Declare pins in binary information
-    stdio_init_all();
     bi_decl_config();
 
     board_init();
     usb_serial_init();
     cdc_uart_init();
     tusb_init();
-    stdio_uart_init();
-
     DAP_Setup();
-    probe_info("Welcome to debugprobe!\n");
+    gpio_init(0);
+    gpio_init(7);
+    gpio_set_function(0, GPIO_FUNC_SIO);
+    gpio_set_function(7, GPIO_FUNC_SIO);
+    gpio_set_dir(0, GPIO_OUT);
+    gpio_set_dir(7, GPIO_OUT);
+    gpio_put(0, 1);
+    gpio_put(7, 0);
 
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);
@@ -294,8 +291,8 @@ void tud_unmount_cb(void)
     autobaud_wait_stop();
   vTaskSuspend(autobaud_taskhandle);
   vTaskDelete(autobaud_taskhandle);
-  vTaskSuspend(i2c_taskhandle);
-  vTaskDelete(i2c_taskhandle);
+  vTaskSuspend(spi_taskhandle);
+  vTaskDelete(spi_taskhandle);
   vTaskSuspend(info_taskhandle);
   vTaskDelete(info_taskhandle);
   was_configured = 0;
@@ -312,14 +309,14 @@ void tud_mount_cb(void)
     /* Autobaud detection using PIO as a frequency counter */
     xTaskCreate(autobaud_thread, "ABR", configMINIMAL_STACK_SIZE, NULL, AUTOBAUD_TASK_PRIO, &autobaud_taskhandle);
 
-    xTaskCreate(power_monitor_thread, "PM", configMINIMAL_STACK_SIZE, NULL, POWER_MONITOR_TASK_PRIO, &i2c_taskhandle);
+    xTaskCreate(power_monitor_thread, "PM", 512, NULL, POWER_MONITOR_TASK_PRIO, &spi_taskhandle);
 
-    xTaskCreate(print_power_monitor_info_thread, "PMI", configMINIMAL_STACK_SIZE, NULL, POWER_MONITOR_TASK_PRIO, &info_taskhandle);
-     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 0));
+    xTaskCreate(print_power_monitor_info_thread, "PMI", 512, NULL, POWER_MONITOR_TASK_PRIO, &info_taskhandle);
+    vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 0));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 0));
     vTaskCoreAffinitySet(uart_taskhandle, (1 << 0));
-    vTaskCoreAffinitySet(info_taskhandle, (1 << 0));
-    vTaskCoreAffinitySet(i2c_taskhandle, (1 << 1));
+    vTaskCoreAffinitySet(info_taskhandle, (1 << 1));
+    vTaskCoreAffinitySet(spi_taskhandle, (1 << 1));
     #if(configNUMBER_OF_CORES > 1)
     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 1));
