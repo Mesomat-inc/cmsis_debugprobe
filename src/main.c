@@ -58,6 +58,7 @@ static uint8_t RxDataBuffer[CFG_TUD_HID_EP_BUFSIZE];
 
 #define THREADED 1
 
+#define UART_LOG_TASK_PRIO (tskIDLE_PRIORITY + 1)
 #define POWER_MONITOR_TASK_PRIO (tskIDLE_PRIORITY + 1)
 #define UART_TASK_PRIO (tskIDLE_PRIORITY + 3)
 #define TUD_TASK_PRIO  (tskIDLE_PRIORITY + 2)
@@ -66,7 +67,7 @@ static uint8_t RxDataBuffer[CFG_TUD_HID_EP_BUFSIZE];
 #define AUTOBAUD_TASK_PRIO  (tskIDLE_PRIORITY + 1)
 
 
-TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle, spi_taskhandle, info_taskhandle;
+TaskHandle_t dap_taskhandle, tud_taskhandle, mon_taskhandle, spi_taskhandle, info_taskhandle, log_taskhandle;
 
 static int was_configured;
 
@@ -148,10 +149,10 @@ int main(void) {
     
     // Declare pins in binary information
     bi_decl_config();
-
     board_init();
     usb_serial_init();
     cdc_uart_init();
+    uart_log_init();
     tusb_init();
     DAP_Setup();
     gpio_init(0);
@@ -160,9 +161,8 @@ int main(void) {
     gpio_set_function(7, GPIO_FUNC_SIO);
     gpio_set_dir(0, GPIO_OUT);
     gpio_set_dir(7, GPIO_OUT);
-    gpio_put(0, 1);
+    gpio_put(0, 0);
     gpio_put(7, 0);
-
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);
 #if (configNUMBER_OF_CORES > 1)
@@ -295,6 +295,8 @@ void tud_unmount_cb(void)
   vTaskDelete(spi_taskhandle);
   vTaskSuspend(info_taskhandle);
   vTaskDelete(info_taskhandle);
+  vTaskSuspend(log_taskhandle);
+  vTaskDelete(log_taskhandle);
   was_configured = 0;
 }
 
@@ -312,11 +314,14 @@ void tud_mount_cb(void)
     xTaskCreate(power_monitor_thread, "PM", 512, NULL, POWER_MONITOR_TASK_PRIO, &spi_taskhandle);
 
     xTaskCreate(print_power_monitor_info_thread, "PMI", 512, NULL, POWER_MONITOR_TASK_PRIO, &info_taskhandle);
+
+    xTaskCreate(uart_log_thread, "LOG", 512, NULL, UART_LOG_TASK_PRIO, &log_taskhandle);
     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 0));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 0));
     vTaskCoreAffinitySet(uart_taskhandle, (1 << 0));
     vTaskCoreAffinitySet(info_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(spi_taskhandle, (1 << 1));
+    vTaskCoreAffinitySet(log_taskhandle, (1 << 0));
     #if(configNUMBER_OF_CORES > 1)
     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 1));

@@ -212,9 +212,6 @@ void power_monitor_thread(void *ptr) {
     }
 }
 
-
-
-
 void print_power_monitor_info_thread(void *ptr) {
     while (1) {      
         if (times == 0 || current == 0) {
@@ -225,5 +222,28 @@ void print_power_monitor_info_thread(void *ptr) {
         tud_cdc_write((uint8_t*)&val, sizeof(val));
         current = 0;
         times = 0;
+    }
+}
+
+
+void uart_log_init(void){
+    uart_init(LOG_UART_INTERFACE, LOG_UART_BAUDRATE);
+    gpio_set_function(LOG_UART_TX, UART_FUNCSEL_NUM(LOG_UART_INTERFACE, LOG_UART_TX));
+    gpio_set_function(LOG_UART_RX, UART_FUNCSEL_NUM(LOG_UART_INTERFACE, LOG_UART_RX));
+}
+
+void uart_log_thread(void *ptr) {
+    uint8_t buf[64];
+    while (1) {      
+        uint32_t count = 0;
+        while  (uart_is_readable(LOG_UART_INTERFACE) && count < sizeof(buf)){
+            buf[count++] = uart_getc(LOG_UART_INTERFACE);
+        }
+        if (count > 0) {
+            tud_cdc_n_write(1, buf, count);
+            tud_cdc_n_write_flush(1);
+        } else {
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
     }
 }
