@@ -66,11 +66,15 @@ pico_generate_pio_header(debugprobe ${CMAKE_CURRENT_LIST_DIR}/src/autobaud.pio)
 
 target_include_directories(debugprobe PRIVATE src)
 
-# add version
-add_custom_target(version
-        ${CMAKE_SOURCE_DIR}/get-version.sh
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+# add version linux
+#add_custom_target(version
+#        ${CMAKE_SOURCE_DIR}/get-version.sh
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/probe)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/probe/version.h "#ifndef _PROBE_VERSION_H\n#define _PROBE_VERSION_H\n#define PROBE_VERSION \"windows-build\"\n#endif\n")
+add_custom_target(version)
 
 target_include_directories(debugprobe PRIVATE
         ${CMAKE_BINARY_DIR}/generated

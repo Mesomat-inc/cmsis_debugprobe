@@ -236,14 +236,23 @@ void uart_log_thread(void *ptr) {
     uint8_t buf[64];
     while (1) {      
         uint32_t count = 0;
-        while  (uart_is_readable(LOG_UART_INTERFACE) && count < sizeof(buf)){
-            buf[count++] = uart_getc(LOG_UART_INTERFACE);
+        
+        // 1. Check how much space TinyUSB actually has ready for us
+        uint32_t usb_space = tud_cdc_n_write_available(1);
+        
+        // 2. Limit our hardware read to whichever is smaller: our local buffer or the USB space
+        uint32_t read_limit = usb_space < sizeof(buf) ? usb_space : sizeof(buf);
+
+        // 3. Read up to the safe limit
+        while (uart_is_readable(uart1) && count < read_limit) {
+            buf[count++] = uart_getc(uart1);
         }
+        
         if (count > 0) {
             tud_cdc_n_write(1, buf, count);
             tud_cdc_n_write_flush(1);
-        } else {
+        } 
             vTaskDelay(pdMS_TO_TICKS(1));
-        }
+        
     }
 }

@@ -114,7 +114,7 @@ bool cdc_task(void)
 
         if (tud_cdc_available()) {
             char cmd_buf[64] = {0};
-            uint32_t count = tud_cdc_read(cmd_buf, sizeof(cmd_buf) - 1);
+            uint32_t count = tud_cdc_n_read(0, cmd_buf, sizeof(cmd_buf) - 1);
             if (count > 0) {
                 if (strstr(cmd_buf, "UART=OFF")) {
                     gpio_put(7, 1);
@@ -254,6 +254,7 @@ void cdc_thread(void *ptr)
 
 void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const* line_coding)
 {
+  if (itf != 0) return;
   if (line_coding->bit_rate == MAGIC_BAUD) {
     if (!autobaud_running)
       autobaud_start();
@@ -323,6 +324,7 @@ void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const* line_coding)
 
 void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
 {
+  if (itf != 0) return;
 #ifdef PROBE_UART_RTS
   gpio_put(PROBE_UART_RTS, !rts);
 #endif
@@ -347,6 +349,7 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
 }
 
 void tud_cdc_send_break_cb(uint8_t itf, uint16_t wValue) {
+  if (itf != 0) return;
   switch(wValue) {
     case 0:
     uart_set_break(PROBE_UART_INTERFACE, false);

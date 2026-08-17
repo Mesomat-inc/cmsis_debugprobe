@@ -71,9 +71,9 @@ enum
   ITF_NUM_PROBE, // Old versions of Keil MDK only look at interface 0
   ITF_NUM_CDC_COM,
   ITF_NUM_CDC_DATA,
-  ITF_NUM_TOTAL,
   ITF_NUM_UART_COM,  
   ITF_NUM_UART_DATA, 
+  ITF_NUM_TOTAL,
 };
 
 #define CDC_NOTIFICATION_EP_NUM 0x81
