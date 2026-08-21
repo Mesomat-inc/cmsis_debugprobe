@@ -29,6 +29,7 @@
 #include "task.h"
 #include "tusb.h"
 #include "autobaud.h"
+#include "hardware/watchdog.h"
 
 
 #include "probe_config.h"
@@ -137,6 +138,11 @@ bool cdc_task(void)
                     snprintf(status, sizeof(status), "SWD: %s UART: %s\r\n",
                              gpio_get(0) ? "OFF" : "ON", gpio_get(7) ? "OFF" : "ON");
                     tud_cdc_write(status, strlen(status));
+                } else if (strstr(cmd_buf, "RESET")) {
+                    watchdog_reboot(0, 0, 0);
+                } else if (strstr(cmd_buf, "RESET")){
+                  watchdog_reboot(0, 0, 0);
+                }
                 } else {
                     tud_cdc_write("Unknown command\r\n", 17);
                 }
@@ -198,8 +204,7 @@ bool cdc_task(void)
         } else {
           keep_alive = true;
         }
-      }
-    } else if (was_connected) {
+      } else if (was_connected) {
       tud_cdc_write_clear();
       uart_set_break(PROBE_UART_INTERFACE, false);
       timed_break = false;

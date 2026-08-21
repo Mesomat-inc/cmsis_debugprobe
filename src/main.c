@@ -326,6 +326,7 @@ void tud_mount_cb(void)
     vTaskCoreAffinitySet(autobaud_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(dap_taskhandle, (1 << 1));
     vTaskCoreAffinitySet(uart_taskhandle, (1 << 0));
+    vTaskCoreAffinitySet(info_taskhandle, (1 << 0));
 #endif
     was_configured = 1;
   }
