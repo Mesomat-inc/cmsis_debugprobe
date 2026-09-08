@@ -21,21 +21,13 @@ First, clone the repository:
 git clone https://github.com/raspberrypi/debugprobe
 cd debugprobe
 ```
-Initialize and update the submodules:
+enter nix environmnet
 ```
- git submodule update --init --recursive
+nix develop
 ```
-Then create and switch to the build directory:
+Then build using just
 ```
- mkdir build
- cd build
-```
-If your environment doesn't contain `PICO_SDK_PATH`, then either add it to your environment variables with `export PICO_SDK_PATH=/path/to/sdk` or add `-DPICO_SDK_PATH=/path/to/sdk` to the arguments to CMake below.
-
-Run cmake and build the code:
-```
- cmake ..
- make
+just build
 ```
 Done! You should now have a `debugprobe.uf2` that you can upload to your Debug Probe via the UF2 bootloader.
 
