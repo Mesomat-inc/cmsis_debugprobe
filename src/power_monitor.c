@@ -58,9 +58,13 @@ uint8_t adc_config_setting[] = {0b10100110, 0b11011000};
 uint8_t alert_config_setting[] = {0b01000000, 0b00000000}; // Alert on current overflow
 
 // 10ohm stunt
-//uint8_t shunt_cal_setting[] = {0x09, 0xC4}; // max 0.01A
-uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
-//uint8_t shunt_cal_setting[] = {0x61, 0xA8}; // max 0.1A
+// The maximum adc range corresponds to 163.84mV, therefore the maximum current
+// cannot be larger than 16.384mA for a 10ohm shunt.
+
+// uint8_t shunt_cal_setting[] = {0x09, 0xC4}; // max 0.01A
+// uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
+// uint8_t shunt_cal_setting[] = {0x61, 0xA8}; // max 0.1A
+uint8_t shunt_cal_setting[] = {0x10, 0x00}; // max 0.016384A
 
 // 1.5ohm shunt
 //uint8_t shunt_cal_setting[] = {0x01, 0x77}; // max 0.01A
@@ -72,9 +76,10 @@ uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
 //uint8_t shunt_cal_setting[] = {0x08, 0x00}; 
 
 //const float current_lsb = 0.0190735; // max 0.01
-const float current_lsb = 0.095367; // max 0.05
+// const float current_lsb = 0.095367; // max 0.05
 //const float current_lsb = 0.190735; // max 0.1
 //const float current_lsb = 2.604; // uA per bit
+const float current_lsb = 0.03125f;
 
 volatile int current = 0;
 volatile int times = 0;
