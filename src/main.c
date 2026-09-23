@@ -160,7 +160,7 @@ int main(void) {
     gpio_set_function(7, GPIO_FUNC_SIO);
     gpio_set_dir(0, GPIO_OUT);
     gpio_set_dir(7, GPIO_OUT);
-    gpio_put(0, 1);
+    gpio_put(0, 0); // set SWD enabled by default
     gpio_put(7, 0);
 
     if (THREADED) {
