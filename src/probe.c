@@ -33,6 +33,7 @@
 #include "probe_config.h"
 #include "probe.h"
 #include "tusb.h"
+#include "hw_config.h"
 
 #define DIV_ROUND_UP(m, n)	(((m) + (n) - 1) / (n))
 
@@ -148,6 +149,22 @@ void probe_write_mode(void) {
     probe_wait_idle();
 }
 
+void probe_enable_swd(void) {
+    gpio_put(PICO_SWD_NOE_PIN, 0);
+}
+
+void probe_disable_swd(void) {
+    gpio_put(PICO_SWD_NOE_PIN, 1);
+}
+
+void probe_enable_usb(void) {
+    gpio_put(PICO_USB_NOE_PIN, 0);
+}
+
+void probe_disable_usb(void) {
+    gpio_put(PICO_USB_NOE_PIN, 1);
+}
+
 void probe_init() {
     if (!probe.initted) {
         probe_gpio_init();
@@ -165,6 +182,8 @@ void probe_init() {
         pio_sm_exec(pio0, PROBE_SM, offset + probe_offset_get_next_cmd);
         pio_sm_set_enabled(pio0, PROBE_SM, 1);
         probe.initted = 1;
+
+        probe_enable_swd();
     }
 }
 
@@ -176,6 +195,7 @@ void probe_deinit(void)
     pio_remove_program(pio0, &probe_program, probe.offset);
 
     probe_assert_reset(1);	// de-assert nRESET
+    probe_disable_swd();
     probe_gpio_deinit();
     probe.initted = 0;
   }
