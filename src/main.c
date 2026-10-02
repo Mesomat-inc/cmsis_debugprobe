@@ -50,6 +50,8 @@
 #include "hardware/structs/usb.h"
 #include "hardware/spi.h"
 
+#include "hw_config.h"
+
 // UART0 for debugprobe debug
 // UART1 for debugprobe to target device
 
@@ -160,14 +162,15 @@ int main(void) {
     cdc_uart_init();
     tusb_init();
     DAP_Setup();
-    gpio_init(0);
-    gpio_init(7);
-    gpio_set_function(0, GPIO_FUNC_SIO);
-    gpio_set_function(7, GPIO_FUNC_SIO);
-    gpio_set_dir(0, GPIO_OUT);
-    gpio_set_dir(7, GPIO_OUT);
-    gpio_put(0, 0); // set SWD enabled by default
-    gpio_put(7, 0);
+    // setup GPIOs for SWD and USB enable/disable
+    gpio_init(PICO_SWD_NOE_PIN);
+    gpio_init(PICO_USB_NOE_PIN);
+    gpio_set_function(PICO_SWD_NOE_PIN, GPIO_FUNC_SIO);
+    gpio_set_function(PICO_USB_NOE_PIN, GPIO_FUNC_SIO);
+    gpio_set_dir(PICO_SWD_NOE_PIN, GPIO_OUT);
+    gpio_set_dir(PICO_USB_NOE_PIN, GPIO_OUT);
+    gpio_put(PICO_USB_NOE_PIN, 1);
+    gpio_put(PICO_SWD_NOE_PIN, 1);
 
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);

@@ -14,39 +14,8 @@
 #include "pico/binary_info.h"
 #include <math.h>
 
-#define PICO_SPI_INSTANCE spi1
-#define PICO_INA_MISO_PIN 8
-#define PICO_INA_CS_PIN 9
-#define PICO_INA_SCLK_PIN 10
-#define PICO_INA_MOSI_PIN 11
-#define PICO_INA_ALERT 12
+#include "hw_config.h"
 
-#define PICO_I2C_INSTANCE i2c1
-#define PICO_I2C_SDA_PIN 6
-#define PICO_I2C_SCL_PIN 7  
-
-#define I2C_ADDR 0x40
-
-#define CONFIG_ADDR 0x00
-#define ADC_CONFIG_ADDR 0x01
-#define SHUNT_CAL_ADDR 0x02
-#define SHUNT_TEMPCO_ADDR 0x03
-#define VSHUNT_ADDR 0x04
-#define VBUS_ADDR 0x05
-#define DIETEMP_ADDR 0x06
-#define CURRENT_ADDR 0x07
-#define POWER_ADDR 0x08
-#define ENERGY_ADDR 0x09
-#define CHARGE_ADDR 0x0A
-#define DIAG_ALRT_ADDR 0x0B
-#define SOVL_ADDR 0x0C
-#define SUVL_ADDR 0x0D
-#define BOVL_ADDR 0x0E
-#define BUVL_ADDR 0x0F
-#define TEMP_LIMIT_ADDR 0x10
-#define PWR_LIMIT_ADDR 0x11
-#define MANUFACTURER_ID_ADDR 0x3E
-#define DEVICE_ID_ADDR 0x3F
 
 
 // Most co nfig registers are 16 bits
