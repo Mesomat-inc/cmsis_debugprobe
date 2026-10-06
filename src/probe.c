@@ -182,9 +182,8 @@ void probe_init() {
         pio_sm_exec(pio0, PROBE_SM, offset + probe_offset_get_next_cmd);
         pio_sm_set_enabled(pio0, PROBE_SM, 1);
         probe.initted = 1;
-
-        probe_enable_swd();
     }
+    probe_enable_swd();
 }
 
 void probe_deinit(void)
