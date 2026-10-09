@@ -23,11 +23,13 @@
               gcc-arm-embedded
               python3
               git
-              pico-sdk
+              (pico-sdk.override { withSubmodules = true; })
+              picotool
+              just
             ];
 
             # Automatically map the SDK path so CMake finds it without manual exports
-            PICO_SDK_PATH = "${pkgs.pico-sdk}/lib/pico-sdk";
+            PICO_SDK_PATH = "${pkgs.pico-sdk.override { withSubmodules = true; }}/lib/pico-sdk";
 
             shellHook = ''
               echo "🚀 debugprobe development shell active"

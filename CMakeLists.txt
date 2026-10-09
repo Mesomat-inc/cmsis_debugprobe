@@ -83,6 +83,22 @@ target_compile_definitions (debugprobe PRIVATE
     PICO_ENABLE_USB_RESET_VIA_VENDOR_INTERFACE=1
 )
 
+# Select USN product ID based on probe role
+set(PROBE_ROLE "sensor" CACHE STRING "Probe role: sensor or gateway")
+set_property(CACHE PROBE_ROLE PROPERTY STRINGS sensor gateway)
+
+if(PROBE_ROLE STREQUAL "sensor")
+    set(PROBE_USB_PID 0x000C)
+elseif(PROBE_ROLE STREQUAL "gateway")
+    set(PROBE_USB_PID 0x000D)
+else()
+    message(FATAL_ERROR "Unknown PROBE_ROLE: ${PROBE_ROLE}")
+endif()
+
+target_compile_definitions(debugprobe PRIVATE
+    PROBE_USB_PID=${PROBE_USB_PID}
+)
+
 option (DEBUG_ON_PICO "Compile firmware for the Pico instead of Debug Probe" OFF)
 if (DEBUG_ON_PICO)
     target_compile_definitions (debugprobe PRIVATE

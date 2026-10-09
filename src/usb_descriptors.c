@@ -30,6 +30,10 @@
 #include "probe_config.h"
 #include "pico/usb_reset.h"
 
+#ifndef PROBE_USB_PID
+#define PROBE_USB_PID 0x000C
+#endif
+
 //--------------------------------------------------------------------+
 // Device Descriptors
 //--------------------------------------------------------------------+
@@ -48,7 +52,7 @@ tusb_desc_device_t const desc_device =
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
     .idVendor           = 0x2E8A, // Pi
-    .idProduct          = 0x000c, // CMSIS-DAP Debug Probe
+    .idProduct          = PROBE_USB_PID, // CMSIS-DAP Debug Probe
     .bcdDevice          = 0x0231, // Version 02.31
     .iManufacturer      = 0x01,
     .iProduct           = 0x02,

@@ -1,2 +1,7 @@
 build
 !.vscode/*
+/build/
+/build-sensor/
+/build-gateway/
+/build-sensor-backup/
+/build-gateway-backup/
