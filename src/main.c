@@ -167,10 +167,13 @@ int main(void) {
     gpio_init(PICO_USB_NOE_PIN);
     gpio_set_function(PICO_SWD_NOE_PIN, GPIO_FUNC_SIO);
     gpio_set_function(PICO_USB_NOE_PIN, GPIO_FUNC_SIO);
+    gpio_set_function(PICO_TXS_OE_PIN, GPIO_FUNC_SIO);
     gpio_set_dir(PICO_SWD_NOE_PIN, GPIO_OUT);
     gpio_set_dir(PICO_USB_NOE_PIN, GPIO_OUT);
+    gpio_set_dir(PICO_TXS_OE_PIN, GPIO_OUT);
     gpio_put(PICO_USB_NOE_PIN, 1);
     gpio_put(PICO_SWD_NOE_PIN, 1);
+    gpio_put(PICO_TXS_OE_PIN, 1);
 
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);

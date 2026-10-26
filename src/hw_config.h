@@ -6,6 +6,7 @@
 #define PICO_INA_ALERT 12
 #define PICO_SWD_NOE_PIN 0
 #define PICO_USB_NOE_PIN 7
+#define PICO_TXS_OE_PIN 15
 
 #define PICO_I2C_INSTANCE i2c1
 #define PICO_I2C_SDA_PIN 6
