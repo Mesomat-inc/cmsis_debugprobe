@@ -33,7 +33,17 @@ uint8_t alert_config_setting[] = {0b01000000, 0b00000000}; // Alert on current o
 // uint8_t shunt_cal_setting[] = {0x09, 0xC4}; // max 0.01A
 // uint8_t shunt_cal_setting[] = {0x30, 0xD4}; // max 0.05A
 // uint8_t shunt_cal_setting[] = {0x61, 0xA8}; // max 0.1A
-uint8_t shunt_cal_setting[] = {0x10, 0x00}; // max 0.016384A
+#if PROBE_IS_GATEWAY
+// Gateway: 0.333 ohm shunt, ADCRANGE = 0
+// Current_LSB = 1.0 uA/count
+// SHUNT_CAL = round(13107.2 * 10^6 * 0.000001 * 0.333) = 4365
+uint8_t shunt_cal_setting[] = {0x11, 0x0D}; // max = 524.288 mA
+const float current_lsb = 1.0f;
+#else
+// Sensor: preserve existing 10 ohm shunt calibration
+uint8_t shunt_cal_setting[] = {0x10, 0x00}; // max = 16.384 mA
+const float current_lsb = 0.03125f;
+#endif
 
 // 1.5ohm shunt
 //uint8_t shunt_cal_setting[] = {0x01, 0x77}; // max 0.01A
@@ -48,7 +58,6 @@ uint8_t shunt_cal_setting[] = {0x10, 0x00}; // max 0.016384A
 // const float current_lsb = 0.095367; // max 0.05
 //const float current_lsb = 0.190735; // max 0.1
 //const float current_lsb = 2.604; // uA per bit
-const float current_lsb = 0.03125f;
 
 volatile int current = 0;
 volatile int times = 0;
