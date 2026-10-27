@@ -97,6 +97,7 @@ endif()
 
 target_compile_definitions(debugprobe PRIVATE
     PROBE_USB_PID=${PROBE_USB_PID}
+    PROBE_IS_GATEWAY=$<STREQUAL:${PROBE_ROLE},gateway>
 )
 
 option (DEBUG_ON_PICO "Compile firmware for the Pico instead of Debug Probe" OFF)

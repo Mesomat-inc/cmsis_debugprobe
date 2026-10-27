@@ -5,3 +5,4 @@ build
 /build-gateway/
 /build-sensor-backup/
 /build-gateway-backup/
+build-sensor-local/
