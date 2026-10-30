@@ -5,13 +5,20 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs =
+    { self, nixpkgs }:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
       forEachSystem = nixpkgs.lib.genAttrs supportedSystems;
     in
     {
-      devShells = forEachSystem (system:
+      devShells = forEachSystem (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
