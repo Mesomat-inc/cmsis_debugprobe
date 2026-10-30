@@ -36,6 +36,12 @@ The environment provides the Pico SDK, ARM compiler, CMake, `picotool`, and `jus
 
 No separate local Pico SDK installation is required.
 
+The build recipes fetch the FreeRTOS submodule automatically if it is missing. To fetch it manually:
+
+```bash
+just init
+```
+
 ## Build firmware
 
 Build the sensor probe firmware:
