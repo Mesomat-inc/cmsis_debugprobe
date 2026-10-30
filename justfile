@@ -10,9 +10,21 @@ _check_nix_shell:
         echo  "\033[33mWarning: Not in a Nix shell. Consider using 'nix develop'.\033[0m"; \
     fi
 
+[working-directory("./")]
+_check_init:
+    @if git submodule status --recursive | grep -q '^-'; then \
+        echo "\033[33mSubmodules not initialized, running 'just init'...\033[0m"; \
+        just init; \
+    fi
+
+# Initialize git submodules (FreeRTOS)
+[working-directory("./")]
+init:
+    git submodule update --init --recursive
+
 # Build the project
 [working-directory("./")]
-build: _check_nix_shell
+build: _check_nix_shell _check_init
     echo "Building the project..."; \
     [ -d build ] || mkdir build; \
     cd build && cmake .. && make; \
@@ -20,7 +32,7 @@ build: _check_nix_shell
 
 # Build Pico firmware for sensor programming
 [working-directory("./")]
-build-sensor: _check_nix_shell
+build-sensor: _check_nix_shell _check_init
     set -e; \
     echo "Building sensor debug probe firmware..."; \
     [ -d build-sensor ] || mkdir -p build-sensor; \
@@ -31,7 +43,7 @@ build-sensor: _check_nix_shell
 
 # Build Pico firmware for gateway programming
 [working-directory("./")]
-build-gateway: _check_nix_shell
+build-gateway: _check_nix_shell _check_init
     set -e; \
     echo "Building gateway debug probe firmware..."; \
     [ -d build-gateway ] || mkdir -p build-gateway; \
